@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <h2>Bonnes affaires</h2>
+  <form method="post" action="{{ base }}/scan">
+    <button type="submit" {% if scanning %}disabled{% endif %}>
+      {% if scanning %}Scan en cours…{% else %}Scanner maintenant{% endif %}
+    </button>
+  </form>
+</div>
+
+{% if last_error %}<p class="alert error">Dernier scan en erreur : {{ last_error }}</p>{% endif %}
+
+{% if not has_searches %}
+  <div class="empty">
+    <h3>Commencez par ajouter une recherche</h3>
+    <p>Faites votre recherche sur vinted.fr avec vos filtres, copiez l'URL du navigateur,
+       puis collez-la dans <a href="{{ base }}/searches">Recherches</a>.</p>
+  </div>
+{% elif sold_count < 3 %}
+  <div class="empty">
+    <h3>Collecte en cours</h3>
+    <p>{{ sold_count }} vente{{ 's' if sold_count > 1 else '' }} observée{{ 's' if sold_count > 1 else '' }}
+       pour l'instant. Il faut quelques jours pour que les prix de revente deviennent fiables :
+       l'add-on doit d'abord voir des articles se vendre.</p>
+    <p>Articles suivis : {{ counts.get('active', 0) }}.</p>
+  </div>
+{% elif not deals %}
+  <div class="empty">
+    <h3>Aucune bonne affaire pour le moment</h3>
+    <p>{{ counts.get('active', 0) }} articles suivis, {{ sold_count }} ventes observées.
+       Rien ne passe les seuils actuels.</p>
+  </div>
+{% else %}
+<form method="get" class="filters">
+  <label>Marge minimum
+    <input type="number" name="min_margin" value="{{ min_margin }}" step="1" min="0">
+  </label>
+  <button type="submit">Filtrer</button>
+</form>
+
+<div class="cards">
+  {% for deal in deals %}
+  <article class="card">
+    <a href="{{ deal.url }}" target="_blank" rel="noopener">
+      {% if deal.photo_url %}<img src="{{ deal.photo_url }}" alt="" loading="lazy">{% endif %}
+    </a>
+    <div class="card-body">
+      <h3><a href="{{ base }}/item/{{ deal.item_id }}">{{ deal.title or 'Sans titre' }}</a></h3>
+      <p class="meta">{{ deal.brand or '—' }}{% if deal.size %} · T. {{ deal.size }}{% endif %}
+         {% if deal.condition %} · {{ deal.condition }}{% endif %}</p>
+      <dl class="figures">
+        <div><dt>Achat</dt><dd>{{ deal.cost | money }}</dd></div>
+        <div><dt>Revente est.</dt><dd>{{ deal.resale | money }}</dd></div>
+        <div class="margin"><dt>Marge</dt><dd>+{{ deal.margin | money }} ({{ deal.margin_pct }} %)</dd></div>
+      </dl>
+      <p class="confidence conf-{{ deal.confidence }}">
+        Confiance {{ deal.confidence }} · {{ deal.comparables }} ventes comparables
+        {% if deal.median_days %} · vendu en {{ deal.median_days | round(0) | int }} j{% endif %}
+      </p>
+      <div class="actions">
+        <a class="btn" href="{{ deal.url }}" target="_blank" rel="noopener">Voir sur Vinted</a>
+        <form method="post" action="{{ base }}/item/{{ deal.item_id }}/dismiss">
+          <button type="submit" class="btn-ghost">Ignorer</button>
+        </form>
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if last_run %}<p class="footnote">Dernier scan : {{ last_run | datetime }}</p>{% endif %}
+{% endblock %}

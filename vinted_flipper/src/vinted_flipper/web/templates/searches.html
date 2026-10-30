@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Recherches</h2>
+
+{% if error %}<p class="alert error">{{ error }}</p>{% endif %}
+{% if added %}<p class="alert ok">Recherche ajoutée, premier scan lancé.</p>{% endif %}
+
+<section class="panel">
+  <h3>Ajouter une recherche</h3>
+  <p class="help">
+    Sur <a href="https://www.vinted.fr" target="_blank" rel="noopener">vinted.fr</a>, faites votre
+    recherche avec vos filtres (marque, taille, état, prix max…), puis copiez l'URL du navigateur.
+  </p>
+  <form method="post" action="{{ base }}/searches" class="stack">
+    <label>URL de la recherche Vinted
+      <input type="url" name="url" id="url" required
+             placeholder="https://www.vinted.fr/catalog?search_text=...&amp;brand_ids[]=88">
+    </label>
+    <p id="preview" class="preview"></p>
+    <label>Nom (facultatif)
+      <input type="text" name="name" placeholder="Déduit des filtres si vide">
+    </label>
+    <div class="row">
+      <label>Pages à scanner
+        <input type="number" name="max_pages" value="3" min="1" max="20">
+      </label>
+      <label>Marge min. € (facultatif)
+        <input type="number" name="min_margin" step="1" min="0" placeholder="défaut">
+      </label>
+      <label>Marge min. % (facultatif)
+        <input type="number" name="min_margin_pct" step="1" min="0" placeholder="défaut">
+      </label>
+    </div>
+    <button type="submit">Ajouter et scanner</button>
+  </form>
+</section>
+
+{% if searches %}
+<table class="table">
+  <thead><tr><th>Nom</th><th>Pages</th><th>Dernier scan</th><th>État</th><th></th></tr></thead>
+  <tbody>
+    {% for search in searches %}
+    <tr class="{{ '' if search.enabled else 'muted' }}">
+      <td>
+        <strong>{{ search.name }}</strong><br>
+        <a class="small" href="{{ search.url }}" target="_blank" rel="noopener">{{ search.url[:80] }}…</a>
+      </td>
+      <td>{{ search.max_pages }}</td>
+      <td class="small">{{ search.last_scan_at | datetime }}</td>
+      <td>{{ 'Active' if search.enabled else 'En pause' }}</td>
+      <td class="row-actions">
+        <form method="post" action="{{ base }}/searches/{{ search.id }}/toggle">
+          <button class="btn-ghost">{{ 'Mettre en pause' if search.enabled else 'Réactiver' }}</button>
+        </form>
+        <form method="post" action="{{ base }}/searches/{{ search.id }}/delete"
+              onsubmit="return confirm('Supprimer cette recherche ? Les articles déjà observés sont conservés.')">
+          <button class="btn-ghost danger">Supprimer</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<script>
+  const input = document.getElementById('url');
+  const preview = document.getElementById('preview');
+  let timer;
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      if (!input.value.trim()) { preview.textContent = ''; return; }
+      const res = await fetch(`{{ base }}/preview?url=${encodeURIComponent(input.value)}`);
+      const data = await res.json();
+      if (data.ok) {
+        const filters = Object.entries(data.filters).map(([k, v]) => `${k} : ${v}`).join(' · ');
+        preview.className = 'preview ok';
+        preview.textContent = filters ? `Filtres détectés — ${filters}` : 'URL valide';
+      } else {
+        preview.className = 'preview error';
+        preview.textContent = data.error;
+      }
+    }, 300);
+  });
+</script>
+{% endblock %}

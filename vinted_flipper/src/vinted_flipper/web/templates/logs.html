@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Journal</h2>
+
+<section class="panel">
+  <h3>Configuration</h3>
+  <dl class="figures">
+    <div><dt>Intervalle</dt><dd>{{ settings.scan_interval_minutes }} min</dd></div>
+    <div><dt>Pages par recherche</dt><dd>{{ settings.max_pages }}</dd></div>
+    <div><dt>Fiches vérifiées / cycle</dt><dd>{{ settings.max_checks_per_cycle }}</dd></div>
+    <div><dt>Marge minimum</dt><dd>{{ settings.min_margin }} € / {{ settings.min_margin_pct }} %</dd></div>
+    <div><dt>Notifications</dt><dd>{{ settings.notify_service or 'désactivées' }}</dd></div>
+    <div><dt>Home Assistant</dt><dd>{{ 'connecté' if ha_available else 'non détecté' }}</dd></div>
+  </dl>
+  {% if ha_available and settings.notify_service %}
+  <form method="post" action="{{ base }}/test-notification">
+    <button type="submit" class="btn-ghost">Tester la notification</button>
+  </form>
+  {% endif %}
+</section>
+
+<table class="table">
+  <thead>
+    <tr><th>Début</th><th>Recherche</th><th>Trouvés</th><th>Nouveaux</th><th>Vérifiés</th><th>Vendus</th><th>Erreur</th></tr>
+  </thead>
+  <tbody>
+    {% for scan in scans %}
+    <tr class="{{ 'error-row' if scan.error }}">
+      <td class="small">{{ scan.started_at | datetime }}</td>
+      <td>{{ scan.search_name or '—' }}</td>
+      <td>{{ scan.found }}</td><td>{{ scan.new_items }}</td>
+      <td>{{ scan.checked }}</td><td>{{ scan.sold }}</td>
+      <td class="small">{{ scan.error or '' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="empty-row">Aucun scan pour l'instant.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

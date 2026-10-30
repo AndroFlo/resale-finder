@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<p><a href="{{ base }}/items">← Tous les articles</a></p>
+<h2>{{ item.title or 'Sans titre' }}</h2>
+
+<div class="detail">
+  {% if item.photo_url %}<img class="detail-photo" src="{{ item.photo_url }}" alt="">{% endif %}
+  <div>
+    <dl class="figures">
+      <div><dt>Statut</dt><dd><span class="pill pill-{{ item.status }}">{{ item.status | status_label }}</span></dd></div>
+      <div><dt>Marque</dt><dd>{{ item.brand or '—' }}</dd></div>
+      <div><dt>Taille</dt><dd>{{ item.size or '—' }}</dd></div>
+      <div><dt>État</dt><dd>{{ item.condition or '—' }}</dd></div>
+      <div><dt>Prix</dt><dd>{{ item.price | money }}</dd></div>
+      <div><dt>Total acheteur</dt><dd>{{ item.total_price | money }}</dd></div>
+      <div><dt>Port</dt><dd>{{ item.shipping_fee | money }}</dd></div>
+      <div><dt>Favoris</dt><dd>{{ item.favourites if item.favourites is not none else '—' }}</dd></div>
+      <div><dt>Catégorie</dt><dd>{{ item.category or '—' }}</dd></div>
+      <div><dt>Vu pour la 1re fois</dt><dd class="small">{{ item.first_seen | datetime }}</dd></div>
+      {% if item.sold_at %}<div><dt>Vendu le</dt><dd class="small">{{ item.sold_at | datetime }}</dd></div>{% endif %}
+    </dl>
+    <p><a class="btn" href="{{ item.url }}" target="_blank" rel="noopener">Voir sur Vinted</a></p>
+  </div>
+</div>
+
+{% if deal %}
+<section class="panel">
+  <h3>Estimation</h3>
+  <p>Achat {{ deal.cost | money }} → revente estimée <strong>{{ deal.resale | money }}</strong>,
+     soit <strong>+{{ deal.margin | money }}</strong> ({{ deal.margin_pct }} %),
+     d'après {{ deal.comparables }} ventes comparables (confiance {{ deal.confidence }}).</p>
+</section>
+{% endif %}
+
+{% if history | length > 1 %}
+<section class="panel">
+  <h3>Historique</h3>
+  <table class="table">
+    <thead><tr><th>Date</th><th>Prix</th><th>Favoris</th></tr></thead>
+    <tbody>
+      {% for row in history %}
+      <tr><td class="small">{{ row.recorded_at | datetime }}</td><td>{{ row.price | money }}</td>
+          <td>{{ row.favourites if row.favourites is not none else '—' }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}

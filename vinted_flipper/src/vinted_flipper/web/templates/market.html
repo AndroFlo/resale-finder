@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Marché</h2>
+<p class="help">Prix réellement observés à la vente, par groupe d'articles comparables.</p>
+
+{% if not clusters %}
+  <div class="empty">
+    <h3>Pas encore de ventes observées</h3>
+    <p>Ce tableau se remplit à mesure que les articles suivis se vendent.</p>
+  </div>
+{% else %}
+<table class="table">
+  <thead>
+    <tr><th>Groupe</th><th>Ventes</th><th>Prix médian</th><th>Fourchette</th><th>Délai de vente</th><th>Écoulement</th><th>Confiance</th></tr>
+  </thead>
+  <tbody>
+    {% for c in clusters %}
+    <tr>
+      <td>{{ c.label }}</td>
+      <td>{{ c.sales }}</td>
+      <td><strong>{{ c.median_price | money }}</strong></td>
+      <td class="small">{{ c.p25 | money }} – {{ c.p75 | money }}</td>
+      <td>{% if c.median_days_to_sell %}{{ c.median_days_to_sell | round(0) | int }} j{% else %}—{% endif %}</td>
+      <td>{{ (c.sell_through * 100) | round(0) | int }} %</td>
+      <td><span class="pill conf-{{ c.confidence }}">{{ c.confidence }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

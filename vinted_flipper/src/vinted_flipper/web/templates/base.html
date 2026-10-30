@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Vinted Flipper{% endblock %}</title>
+  <link rel="stylesheet" href="{{ base }}/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Vinted Flipper</h1>
+    <nav>
+      <a href="{{ base }}/">Bonnes affaires{% if deal_count %} <span class="badge">{{ deal_count }}</span>{% endif %}</a>
+      <a href="{{ base }}/items">Articles</a>
+      <a href="{{ base }}/market">Marché</a>
+      <a href="{{ base }}/searches">Recherches</a>
+      <a href="{{ base }}/logs">Journal</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

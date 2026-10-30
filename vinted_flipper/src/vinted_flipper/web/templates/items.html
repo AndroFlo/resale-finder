@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Articles suivis</h2>
+
+<form method="get" class="filters">
+  <label>Statut
+    <select name="status">
+      <option value="" {{ 'selected' if not status }}>Tous</option>
+      <option value="active" {{ 'selected' if status == 'active' }}>En vente</option>
+      <option value="sold" {{ 'selected' if status == 'sold' }}>Vendus</option>
+      <option value="removed" {{ 'selected' if status == 'removed' }}>Retirés</option>
+    </select>
+  </label>
+  <label>Recherche
+    <select name="search_id">
+      <option value="">Toutes</option>
+      {% for s in searches %}
+      <option value="{{ s.id }}" {{ 'selected' if search_id == s.id|string }}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">Filtrer</button>
+</form>
+
+<p class="footnote">
+  {% for key, label in [('active','en vente'), ('sold','vendus'), ('removed','retirés')] %}
+    {{ counts.get(key, 0) }} {{ label }}{{ ' · ' if not loop.last }}
+  {% endfor %}
+</p>
+
+<table class="table">
+  <thead>
+    <tr><th></th><th>Article</th><th>Marque</th><th>Taille</th><th>Prix</th><th>Total</th><th>Statut</th><th>Vu le</th></tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{% if item.photo_url %}<img class="thumb" src="{{ item.photo_url }}" alt="" loading="lazy">{% endif %}</td>
+      <td><a href="{{ base }}/item/{{ item.item_id }}">{{ item.title or 'Sans titre' }}</a></td>
+      <td>{{ item.brand or '—' }}</td>
+      <td>{{ item.size or '—' }}</td>
+      <td>{{ item.price | money }}</td>
+      <td>{{ item.total_price | money }}</td>
+      <td><span class="pill pill-{{ item.status }}">{{ item.status | status_label }}</span></td>
+      <td class="small">{{ (item.sold_at or item.last_seen) | datetime }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="empty-row">Aucun article pour ce filtre.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="pager">
+  {% if page > 1 %}
+  <a href="{{ base }}/items?status={{ status }}&search_id={{ search_id }}&page={{ page - 1 }}">← Précédent</a>
+  {% endif %}
+  {% if has_next %}
+  <a href="{{ base }}/items?status={{ status }}&search_id={{ search_id }}&page={{ page + 1 }}">Suivant →</a>
+  {% endif %}
+</div>
+{% endblock %}
