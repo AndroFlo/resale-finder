@@ -2,7 +2,7 @@ name: Vinted Flipper
 version: "0.1.0"
 slug: vinted_flipper
 description: Repère sur Vinted les articles revendables plus cher
-url: https://github.com/AndroFlo/vinted-flipper
+url: https://github.com/AndroFlo/resale-finder
 arch:
   - aarch64
   - amd64

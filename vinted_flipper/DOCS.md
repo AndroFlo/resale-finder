@@ -18,7 +18,7 @@ L'achat et la revente restent manuels : l'add-on ne fait qu'observer et estimer.
 ## Installation
 
 Dans Home Assistant : **Paramètres → Modules complémentaires → Boutique → ⋮ → Dépôts**,
-ajoutez `https://github.com/AndroFlo/vinted-flipper`, puis installez « Vinted Flipper ».
+ajoutez `https://github.com/AndroFlo/resale-finder`, puis installez « Vinted Flipper ».
 
 L'interface apparaît ensuite dans la barre latérale.
 
