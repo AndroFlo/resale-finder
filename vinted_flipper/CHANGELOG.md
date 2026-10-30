@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- Corrige l'échec de construction de l'image : la base Alpine 3.19 fournit Python 3.11
+  alors que le paquet exige 3.12. Passage à Alpine 3.20 (Python 3.12).
+
 ## 0.1.0
 
 Première version.
